@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sequência Fit</title>
+<style>
+:root{color-scheme:dark;--bg:#0d1117;--card:#161b22;--card2:#1c232d;--line:#2a323d;--tx:#f0f3f6;--mu:#8b96a3;--ac:#58e06b;--acd:#2fa84a;--fire:#ff9f1c;--blue:#4cc9f0;--r:18px;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:700}
+.app{max-width:480px;margin:0 auto;padding:16px 16px 40px;display:grid;gap:14px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:var(--r);padding:16px}
+h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--mu);margin:0 0 12px;font-weight:800}
+.hero{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#1d2430,#161b22)}
+.flame{font-size:56px;line-height:1;filter:grayscale(1) brightness(.6);transition:.4s}
+.flame.on{filter:none;animation:flick 1.6s infinite alternate}
+@keyframes flick{from{transform:scale(1) rotate(-3deg)}to{transform:scale(1.08) rotate(3deg)}}
+.big{font-size:42px;font-weight:900;color:var(--fire);line-height:1}
+.sub{color:var(--mu);font-size:14px;margin-top:4px}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.day{font-size:12px;color:var(--mu)}
+.dot{width:34px;height:34px;border-radius:50%;margin:6px auto 0;border:2px solid var(--line);display:grid;place-items:center;font-size:16px;background:var(--card2)}
+.dot.ok{background:var(--ac);border-color:var(--ac);color:#06210d}
+.dot.today{border-color:var(--blue)}
+.ringwrap{display:flex;align-items:center;gap:16px}
+.ring{position:relative;width:110px;height:110px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring .c{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-size:22px;font-weight:900}
+.ring small{display:block;font-size:11px;color:var(--mu);font-weight:700}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.chip{background:var(--card2);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;color:var(--tx);padding:10px 4px;font:inherit;font-size:13px;cursor:pointer;text-align:center}
+.chip span{display:block;font-size:24px}
+.chip.sel{border-color:var(--blue);background:#14303a}
+.chip:active{transform:translateY(2px);border-bottom-width:2px}
+label{display:block;font-size:13px;color:var(--mu);margin:14px 0 6px}
+input[type=range]{width:100%;accent-color:var(--ac)}
+input[type=number]{width:100%;background:var(--card2);border:2px solid var(--line);border-radius:12px;color:var(--tx);padding:10px;font:inherit;font-size:16px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg button{background:var(--card2);border:2px solid var(--line);border-radius:12px;color:var(--mu);padding:9px;font:inherit;font-size:13px;cursor:pointer}
+.seg button.sel{color:var(--tx);border-color:var(--ac)}
+.val{color:var(--tx);font-weight:900}
+.cta{width:100%;margin-top:18px;background:var(--ac);color:#06210d;border:0;border-bottom:5px solid var(--acd);border-radius:16px;padding:15px;font:inherit;font-size:16px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+.cta:active{transform:translateY(3px);border-bottom-width:2px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.stat{background:var(--card2);border-radius:14px;padding:12px}
+.stat b{font-size:22px;display:block}
+.stat span{font-size:12px;color:var(--mu)}
+.item{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}
+.item .e{font-size:26px}.item .t{flex:1;font-size:14px}.item .t small{display:block;color:var(--mu);font-weight:700}
+.del{background:none;border:0;color:var(--mu);font-size:18px;cursor:pointer}
+.empty{color:var(--mu);font-size:14px;text-align:center;padding:10px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,120px);background:var(--ac);color:#06210d;padding:14px 22px;border-radius:16px;font-weight:900;transition:.4s;z-index:20;text-align:center;max-width:90%}
+.toast.show{transform:translate(-50%,0)}
+.pc{position:fixed;top:40%;left:50%;width:10px;height:10px;border-radius:2px;pointer-events:none;z-index:30;animation:fly 1.1s ease-out forwards}
+@keyframes fly{to{transform:translate(var(--x),var(--y)) rotate(var(--r));opacity:0}}
+.pop{animation:pop .6s}
+@keyframes pop{40%{transform:scale(1.25)}}
+details summary{cursor:pointer;color:var(--mu);font-size:13px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="card hero">
+    <div class="flame" id="flame">🔥</div>
+    <div><div class="big" id="streak">0</div><div class="sub" id="streakTxt">dias de sequência</div><div class="sub" id="rec"></div></div>
+  </div>
+
+  <div class="card"><h2>Esta semana</h2><div class="week" id="week"></div></div>
+
+  <div class="card ringwrap">
+    <div class="ring">
+      <svg width="110" height="110" viewBox="0 0 110 110"><circle cx="55" cy="55" r="46" fill="none" stroke="#2a323d" stroke-width="12"/><circle id="arc" cx="55" cy="55" r="46" fill="none" stroke="#58e06b" stroke-width="12" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289" style="transition:stroke-dashoffset .8s"/></svg>
+      <div class="c"><div><span id="pct">0%</span><small>da meta</small></div></div>
+    </div>
+    <div><div style="font-size:18px;font-weight:900" id="todayMin">0 min</div><div class="sub" id="goalTxt"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>Registrar atividade</h2>
+    <div class="chips" id="chips"></div>
+    <label>Duração: <span class="val" id="durV">30 min</span></label>
+    <input type="range" id="dur" min="5" max="180" step="5" value="30">
+    <div id="distBox"><label>Distância (<span id="distU">km</span>) — opcional</label><input type="number" id="dist" min="0" step="0.1" placeholder="0"></div>
+    <label>Intensidade</label>
+    <div class="seg" id="seg"></div>
+    <div class="sub" style="margin-top:12px">Calorias estimadas: <span class="val" id="kcal">0</span> kcal</div>
+    <button class="cta" id="done">Concluir atividade</button>
+  </div>
+
+  <div class="card"><h2>Totais</h2><div class="stats" id="stats"></div></div>
+
+  <div class="card"><h2>Histórico</h2><div id="hist"></div></div>
+
+  <details class="card"><summary>⚙️ Ajustes (meta e peso)</summary>
+    <div class="row"><div><label>Meta diária (min)</label><input type="number" id="goal" min="5" max="300"></div><div><label>Peso (kg)</label><input type="number" id="peso" min="30" max="250"></div></div>
+  </details>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== Variáveis de exercício =====
+// met: gasto energético (MET); unit: unidade de distância; fator: conversão da unidade p/ km
+const ATIVIDADES = {
+  caminhada:{nome:"Caminhada",emoji:"🚶",met:3.8,unit:"km",fator:1},
+  corrida:{nome:"Corrida",emoji:"🏃",met:9.8,unit:"km",fator:1},
+  natacao:{nome:"Natação",emoji:"🏊",met:7.0,unit:"m",fator:0.001},
+  ciclismo:{nome:"Ciclismo",emoji:"🚴",met:7.5,unit:"km",fator:1},
+  yoga:{nome:"Yoga",emoji:"🧘",met:2.5,unit:null,fator:0},
+  musculacao:{nome:"Musculação",emoji:"🏋️",met:5.0,unit:null,fator:0}
+};
+const INTENSIDADES = {leve:{nome:"Leve",mult:0.8},moderada:{nome:"Moderada",mult:1},intensa:{nome:"Intensa",mult:1.25}};
+// Registro: {id, data(AAAA-MM-DD), tipo, minutos, distanciaKm, intensidade, kcal}
+
+const $=id=>document.getElementById(id);
+let state={logs:[],meta:20,peso:70};
+let sel="caminhada", inten="moderada";
+
+try{const s=localStorage.getItem("seqfit");if(s)state=Object.assign(state,JSON.parse(s))}catch(e){}
+const save=()=>{try{localStorage.setItem("seqfit",JSON.stringify(state))}catch(e){}};
+
+const key=d=>{const z=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate())};
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const today=()=>new Date();
+const minutesOn=k=>state.logs.filter(l=>l.data===k).reduce((a,l)=>a+l.minutos,0);
+const okDays=()=>{const s=new Set();state.logs.forEach(l=>{s.add(l.data)});return [...s].filter(k=>minutesOn(k)>=state.meta)};
+
+function streaks(){
+  const set=new Set(okDays());
+  let d=today(); if(!set.has(key(d))) d=addDays(d,-1);
+  let cur=0; while(set.has(key(d))){cur++;d=addDays(d,-1)}
+  const arr=[...set].sort(); let best=0,run=0,prev=null;
+  arr.forEach(k=>{const dt=new Date(k+"T00:00:00");run=(prev&&Math.round((dt-prev)/864e5)===1)?run+1:1;best=Math.max(best,run);prev=dt});
+  return {cur,best};
+}
+const calc=()=>{const a=ATIVIDADES[sel];return Math.round(a.met*INTENSIDADES[inten].mult*state.peso*(+$("dur").value/60))};
+
+function render(){
+  const {cur,best}=streaks(), set=new Set(okDays()), tk=key(today()), tm=minutesOn(tk);
+  $("streak").textContent=cur;
+  $("streakTxt").textContent=cur===1?"dia de sequência":"dias de sequência";
+  $("flame").classList.toggle("on",cur>0);
+  $("rec").textContent="Recorde: "+best+(best===1?" dia":" dias");
+  // semana
+  const nomes=["D","S","T","Q","Q","S","S"]; let h="";
+  for(let i=6;i>=0;i--){const d=addDays(today(),-i),k=key(d),ok=set.has(k);
+    h+=`<div><div class="day">${nomes[d.getDay()]}</div><div class="dot ${ok?"ok":""} ${i===0?"today":""}">${ok?"✓":""}</div></div>`}
+  $("week").innerHTML=h;
+  // anel
+  const p=Math.min(1,tm/state.meta);
+  $("arc").style.strokeDashoffset=289*(1-p);
+  $("pct").textContent=Math.round(p*100)+"%";
+  $("todayMin").textContent=tm+" min hoje";
+  $("goalTxt").textContent=tm>=state.meta?"Meta batida! Sequência garantida 🎉":"Faltam "+(state.meta-tm)+" min para manter a sequência";
+  // totais
+  const L=state.logs, min=L.reduce((a,l)=>a+l.minutos,0), km=L.reduce((a,l)=>a+(l.distanciaKm||0),0), kc=L.reduce((a,l)=>a+l.kcal,0);
+  $("stats").innerHTML=[[Math.floor(min/60)+"h "+min%60+"m","tempo ativo"],[km.toFixed(1)+" km","distância"],[kc.toLocaleString("pt-BR"),"kcal gastas"],[set.size,"dias de meta"]].map(s=>`<div class="stat"><b>${s[0]}</b><span>${s[1]}</span></div>`).join("");
+  // histórico
+  const recent=[...L].reverse().slice(0,8);
+  $("hist").innerHTML=recent.length?recent.map(l=>{const a=ATIVIDADES[l.tipo],dt=l.data.split("-").reverse().slice(0,2).join("/");
+    return `<div class="item"><div class="e">${a.emoji}</div><div class="t">${a.nome} · ${l.minutos} min<small>${dt} · ${l.kcal} kcal${l.distanciaKm?" · "+l.distanciaKm.toFixed(2).replace(/\.?0+$/,"")+" km":""} · ${INTENSIDADES[l.intensidade].nome}</small></div><button class="del" data-id="${l.id}" title="Remover">✕</button></div>`}).join(""):'<div class="empty">Nenhuma atividade ainda. Comece hoje!</div>';
+  $("kcal").textContent=calc();
+}
+
+function buildForm(){
+  $("chips").innerHTML=Object.entries(ATIVIDADES).map(([k,a])=>`<button class="chip ${k===sel?"sel":""}" data-k="${k}"><span>${a.emoji}</span>${a.nome}</button>`).join("");
+  $("seg").innerHTML=Object.entries(INTENSIDADES).map(([k,i])=>`<button class="${k===inten?"sel":""}" data-i="${k}">${i.nome}</button>`).join("");
+  const a=ATIVIDADES[sel]; $("distBox").style.display=a.unit?"block":"none"; if(a.unit)$("distU").textContent=a.unit;
+}
+$("chips").onclick=e=>{const b=e.target.closest(".chip");if(b){sel=b.dataset.k;buildForm();render()}};
+$("seg").onclick=e=>{const b=e.target.closest("button");if(b){inten=b.dataset.i;buildForm();render()}};
+$("dur").oninput=()=>{$("durV").textContent=$("dur").value+" min";render()};
+$("goal").onchange=()=>{state.meta=Math.max(5,+$("goal").value||20);save();render()};
+$("peso").onchange=()=>{state.peso=Math.max(30,+$("peso").value||70);save();render()};
+$("hist").onclick=e=>{const b=e.target.closest(".del");if(b){state.logs=state.logs.filter(l=>l.id!=b.dataset.id);save();render()}};
+
+function confetti(){
+  const cs=["#58e06b","#ff9f1c","#4cc9f0","#f72585","#ffd166"];
+  for(let i=0;i<36;i++){const p=document.createElement("div");p.className="pc";p.style.background=cs[i%5];
+    p.style.setProperty("--x",(Math.random()*300-150)+"px");p.style.setProperty("--y",(Math.random()*-260-40)+"px");p.style.setProperty("--r",(Math.random()*720)+"deg");
+    document.body.appendChild(p);setTimeout(()=>p.remove(),1200)}
+}
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2600)}
+
+$("done").onclick=()=>{
+  const a=ATIVIDADES[sel], tk=key(today()), before=minutesOn(tk)>=state.meta;
+  const d=parseFloat($("dist").value)||0;
+  state.logs.push({id:Date.now(),data:tk,tipo:sel,minutos:+$("dur").value,distanciaKm:a.unit?d*a.fator:0,intensidade:inten,kcal:calc()});
+  save(); $("dist").value=""; render();
+  const after=minutesOn(tk)>=state.meta;
+  if(after&&!before){confetti();const s=$("streak");s.classList.remove("pop");void s.offsetWidth;s.classList.add("pop");toast("🔥 Sequência de "+streaks().cur+(streaks().cur===1?" dia!":" dias!"))}
+  else toast("✓ Atividade registrada!");
+};
+
+$("goal").value=state.meta;$("peso").value=state.peso;
+buildForm();render();
+</script>
+</body>
+</html>
